@@ -14,6 +14,13 @@ open class LocationAnnotationNode: LocationNode {
     /// Required to allow scaling at the same time as having a 2D 'billboard' appearance
     public let annotationNode: AnnotationNode
 
+    /// Whether the node should be scaled relative to its distance from the camera
+    /// Default value (false) scales it to visually appear at the same size no matter the distance
+    /// Setting to true causes annotation nodes to scale like a regular node
+    /// Scaling relative to distance may be useful with local navigation-based uses
+    /// For landmarks in the distance, the default is correct
+    public var scaleRelativeToDistance = false
+
     public init(location: CLLocation?, image: UIImage) {
         let plane = SCNPlane(width: image.size.width / 100, height: image.size.height / 100)
         plane.firstMaterial!.diffuse.contents = image
@@ -47,7 +54,7 @@ open class LocationAnnotationNode: LocationNode {
         fatalError("init(coder:) has not been implemented")
     }
 
-    override func updatePositionAndScale(setup: Bool = false, scenePosition: SCNVector3?, locationNodeLocation nodeLocation: CLLocation,
+    override func updatePositionAndScale(setup: Bool = false, scenePosition: SCNVector3?,
                                          locationManager: SceneLocationManager, onCompletion: (() -> Void)) {
         guard let position = scenePosition, let location = locationManager.currentLocation else { return }
 
@@ -56,11 +63,10 @@ open class LocationAnnotationNode: LocationNode {
 
         let distance = self.location(locationManager.bestLocationEstimate).distance(from: location)
 
-        let adjustedDistance = self.adjustedDistance(setup: setup, position: position,
-                                                     locationNodeLocation: nodeLocation, locationManager: locationManager)
+        let adjustedDistance = self.adjustedDistance(setup: setup, position: position, locationManager: locationManager)
 
-        // The scale of a node with a billboard constraint applied is ignored
-        // The annotation subnode itself, as a subnode, has the scale applied to it
+        //The scale of a node with a billboard constraint applied is ignored
+        //The annotation subnode itself, as a subnode, has the scale applied to it
         let appliedScale = self.scale
         self.scale = SCNVector3(x: 1, y: 1, z: 1)
 
@@ -69,20 +75,11 @@ open class LocationAnnotationNode: LocationNode {
         if scaleRelativeToDistance {
             scale = appliedScale.y
             annotationNode.scale = appliedScale
-            annotationNode.childNodes.forEach { child in
-                child.scale = appliedScale
-            }
         } else {
-            // Scale it to be an appropriate size so that it can be seen
-            scale = Float(adjustedDistance) * 0.181
-            if distance > 3_000 {
-                scale *= 0.75
-            }
+            let scaleFunc = scalingScheme.getScheme()
+            scale = scaleFunc(distance, adjustedDistance)
 
             annotationNode.scale = SCNVector3(x: scale, y: scale, z: scale)
-            annotationNode.childNodes.forEach { node in
-                node.scale = SCNVector3(x: scale, y: scale, z: scale)
-            }
         }
 
         self.pivot = SCNMatrix4MakeTranslation(0, -1.1 * scale, 0)

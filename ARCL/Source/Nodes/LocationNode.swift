@@ -66,12 +66,8 @@ open class LocationNode: SCNNode {
     /// at regular intervals. You can do this with `SceneLocationView`'s `updatePositionOfLocationNode`.
     public var continuallyUpdatePositionAndScale = true
 
-    /// Whether the node should be scaled relative to its distance from the camera
-    /// Default value (false) scales it to visually appear at the same size no matter the distance
-    /// Setting to true causes annotation nodes to scale like a regular node
-    /// Scaling relative to distance may be useful with local navigation-based uses
-    /// For landmarks in the distance, the default is correct
-    public var scaleRelativeToDistance = false
+    /// The scheme to use for scaling
+    public var scalingScheme: ScalingScheme = .normal
 
     public init(location: CLLocation?) {
         self.location = location
