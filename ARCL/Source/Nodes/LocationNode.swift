@@ -65,9 +65,11 @@ open class LocationNode: SCNNode {
     /// This should only be set to false if you plan to manually update position and scale
     /// at regular intervals. You can do this with `SceneLocationView`'s `updatePositionOfLocationNode`.
     public var continuallyUpdatePositionAndScale = true
-    
-    /// Locations over this value are scaled down and their distance is modified to this value.
-    public static var thresholdDistance: Double = 100
+
+    /// Whether the node should appear at the same altitude of the user
+    /// May be useful when you don't know the real altitude of the node
+    /// When set to true, the node will stay at the same altitude of the user
+    public var ignoreAltitude = false
 
     public init(location: CLLocation?) {
         self.location = location
@@ -93,18 +95,23 @@ open class LocationNode: SCNNode {
 
     internal func adjustedDistance(setup: Bool, position: SCNVector3, locationNodeLocation: CLLocation,
                                    locationManager: SceneLocationManager) -> CLLocationDistance {
-        guard let location = locationManager.currentLocation else { return 0.0 }
+        guard let location = locationManager.currentLocation else {
+            return 0.0
+        }
 
-        //Position is set to a position coordinated via the current position
+        // Position is set to a position coordinated via the current position
         let distance = self.location(locationManager.bestLocationEstimate).distance(from: location)
 
-        let adjustedDistance: CLLocationDistance
-        if locationConfirmed && (distance > LocationNode.thresholdDistance || continuallyAdjustNodePositionWhenWithinRange || setup) {
-            let locationTranslation = location.translation(toLocation: locationNodeLocation)
+        var locationTranslation = location.translation(toLocation: locationNodeLocation)
+        locationTranslation.altitudeTranslation = ignoreAltitude ? 0 : locationTranslation.altitudeTranslation
 
-            if distance > LocationNode.thresholdDistance {
+        let adjustedDistance: CLLocationDistance
+        if locationConfirmed && (distance > 100 || continuallyAdjustNodePositionWhenWithinRange || setup) {
+            let locationTranslation = location.translation(toLocation: self.location(locationManager.bestLocationEstimate))
+
+            if distance > 100 {
                 //If the item is too far away, bring it closer and scale it down
-                let scale = Float(LocationNode.thresholdDistance / distance)
+                let scale = 100 / Float(distance)
 
                 adjustedDistance = distance * Double(scale)
 
@@ -132,11 +139,11 @@ open class LocationNode: SCNNode {
         return adjustedDistance
     }
 
-    func updatePositionAndScale(setup: Bool = false, scenePosition: SCNVector3?,
-                                locationNodeLocation nodeLocation: CLLocation,
-                                locationManager: SceneLocationManager,
-                                onCompletion: (() -> Void)) {
-        guard let position = scenePosition, locationManager.currentLocation != nil else { return }
+    func updatePositionAndScale(setup: Bool = false, scenePosition: SCNVector3?, locationNodeLocation nodeLocation: CLLocation,
+                                locationManager: SceneLocationManager, onCompletion: (() -> Void)) {
+        guard let position = scenePosition, locationManager.currentLocation != nil else {
+            return
+        }
 
         SCNTransaction.begin()
         SCNTransaction.animationDuration = setup ? 0.0 : 0.1

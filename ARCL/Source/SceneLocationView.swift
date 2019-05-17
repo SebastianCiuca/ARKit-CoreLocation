@@ -199,13 +199,14 @@ public extension SceneLocationView {
     /// Upon being added, a node's position will be modified and should not be changed externally.
     /// location will not be modified, but taken as accurate.
     func addLocationNodeWithConfirmedLocation(locationNode: LocationNode) {
-        if locationNode.location == nil || locationNode.locationConfirmed == false { return }
-        
+        if locationNode.location == nil || locationNode.locationConfirmed == false {
+            return
+        }
+
         let locationNodeLocation = locationOfLocationNode(locationNode)
 
         locationNode.updatePositionAndScale(setup: true,
-                                            scenePosition: currentScenePosition,
-                                            locationNodeLocation: locationNodeLocation,
+                                            scenePosition: currentScenePosition, locationNodeLocation: locationNodeLocation,
                                             locationManager: sceneLocationManager) {
                                                 self.locationViewDelegate?
                                                     .didUpdateLocationAndScaleOfLocationNode(sceneLocationView: self,
@@ -325,15 +326,15 @@ extension SceneLocationView: SceneLocationManagerDelegate {
         }
     }
 
-    func updatePositionAndScaleOfLocationNodes() {        
+    func updatePositionAndScaleOfLocationNodes() {
         locationNodes.filter { $0.continuallyUpdatePositionAndScale }.forEach { node in
             let locationNodeLocation = locationOfLocationNode(node)
-            node.updatePositionAndScale(
-                scenePosition: currentScenePosition,
-                locationNodeLocation: locationNodeLocation,
-                locationManager: sceneLocationManager) {
-                    self.locationViewDelegate?.didUpdateLocationAndScaleOfLocationNode(
-                        sceneLocationView: self, locationNode: node)
+            node.updatePositionAndScale(scenePosition: currentScenePosition,
+                                        locationNodeLocation: locationNodeLocation,
+                                        locationManager: sceneLocationManager) {
+                                            self.locationViewDelegate?
+                                                .didUpdateLocationAndScaleOfLocationNode(sceneLocationView: self,
+                                                                                         locationNode: node)
             }
         }
     }
