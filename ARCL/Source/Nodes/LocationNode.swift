@@ -65,6 +65,9 @@ open class LocationNode: SCNNode {
     /// This should only be set to false if you plan to manually update position and scale
     /// at regular intervals. You can do this with `SceneLocationView`'s `updatePositionOfLocationNode`.
     public var continuallyUpdatePositionAndScale = true
+    
+    /// Locations over this value are scaled down and their distance is modified to this value.
+    public static var thresholdDistance: Double = 100
 
     public init(location: CLLocation?) {
         self.location = location
@@ -88,7 +91,7 @@ open class LocationNode: SCNNode {
         }
     }
 
-    internal func adjustedDistance(setup: Bool, position: SCNVector3,
+    internal func adjustedDistance(setup: Bool, position: SCNVector3, locationNodeLocation: CLLocation,
                                    locationManager: SceneLocationManager) -> CLLocationDistance {
         guard let location = locationManager.currentLocation else { return 0.0 }
 
@@ -96,12 +99,12 @@ open class LocationNode: SCNNode {
         let distance = self.location(locationManager.bestLocationEstimate).distance(from: location)
 
         let adjustedDistance: CLLocationDistance
-        if locationConfirmed && (distance > 100 || continuallyAdjustNodePositionWhenWithinRange || setup) {
-            let locationTranslation = location.translation(toLocation: self.location(locationManager.bestLocationEstimate))
+        if locationConfirmed && (distance > LocationNode.thresholdDistance || continuallyAdjustNodePositionWhenWithinRange || setup) {
+            let locationTranslation = location.translation(toLocation: locationNodeLocation)
 
-            if distance > 100 {
+            if distance > LocationNode.thresholdDistance {
                 //If the item is too far away, bring it closer and scale it down
-                let scale = 100 / Float(distance)
+                let scale = Float(LocationNode.thresholdDistance / distance)
 
                 adjustedDistance = distance * Double(scale)
 
@@ -130,13 +133,16 @@ open class LocationNode: SCNNode {
     }
 
     func updatePositionAndScale(setup: Bool = false, scenePosition: SCNVector3?,
-                                locationManager: SceneLocationManager, onCompletion: (() -> Void)) {
+                                locationNodeLocation nodeLocation: CLLocation,
+                                locationManager: SceneLocationManager,
+                                onCompletion: (() -> Void)) {
         guard let position = scenePosition, locationManager.currentLocation != nil else { return }
 
         SCNTransaction.begin()
         SCNTransaction.animationDuration = setup ? 0.0 : 0.1
 
-        _ = self.adjustedDistance(setup: setup, position: position, locationManager: locationManager)
+        _ = self.adjustedDistance(setup: setup, position: position,
+                                  locationNodeLocation: nodeLocation, locationManager: locationManager)
 
         SCNTransaction.commit()
 
