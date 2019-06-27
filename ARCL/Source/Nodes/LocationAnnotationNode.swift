@@ -75,8 +75,7 @@ open class LocationAnnotationNode: LocationNode {
     override func updatePositionAndScale(setup: Bool = false, scenePosition: SCNVector3?,
                                          locationNodeLocation nodeLocation: CLLocation,
                                          locationManager: SceneLocationManager,
-                                         onCompletion: (() -> Void)) {
-        print("IT'S A PARTY IN THE USA!")
+                                         onCompletion: (() -> Void)) {        
         guard let position = scenePosition, let location = locationManager.currentLocation else { return }
 
         SCNTransaction.begin()
