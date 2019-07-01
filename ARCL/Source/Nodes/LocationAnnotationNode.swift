@@ -16,7 +16,7 @@ open class LocationAnnotationNode: LocationNode {
     
     // TODO: - Change this to desired one
     /// The maximum estimated distance up until locations are shown.
-    public static var maxDistance: Float = 50//300
+    public static var maxDistance: Float = 300
     
     /// Constant used in scaling computations for scaling up.
     private static let scalingConstant: Float = 0.181
@@ -76,7 +76,7 @@ open class LocationAnnotationNode: LocationNode {
                                          locationNodeLocation nodeLocation: CLLocation,
                                          locationManager: SceneLocationManager,
                                          onCompletion: (() -> Void)) {
-        print("Max Distance = 50")
+        print("MD =300; Test case 2: mD < adjustedDistance (threshold)")
         guard let position = scenePosition, let location = locationManager.currentLocation else { return }
 
         SCNTransaction.begin()

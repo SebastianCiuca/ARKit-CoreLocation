@@ -67,7 +67,7 @@ open class LocationNode: SCNNode {
     public var continuallyUpdatePositionAndScale = true
     
     /// Locations over this value are scaled down and their distance is modified to this value.
-    public static var thresholdDistance: Double = 100
+    public static var thresholdDistance: Double = 400
 
     public init(location: CLLocation?) {
         self.location = location
