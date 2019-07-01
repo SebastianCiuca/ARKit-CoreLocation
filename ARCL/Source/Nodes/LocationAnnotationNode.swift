@@ -76,6 +76,7 @@ open class LocationAnnotationNode: LocationNode {
                                          locationNodeLocation nodeLocation: CLLocation,
                                          locationManager: SceneLocationManager,
                                          onCompletion: (() -> Void)) {
+        print("Max Distance = 50")
         guard let position = scenePosition, let location = locationManager.currentLocation else { return }
 
         SCNTransaction.begin()
