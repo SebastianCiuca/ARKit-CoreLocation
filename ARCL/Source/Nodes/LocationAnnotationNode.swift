@@ -76,7 +76,6 @@ open class LocationAnnotationNode: LocationNode {
                                          locationNodeLocation nodeLocation: CLLocation,
                                          locationManager: SceneLocationManager,
                                          onCompletion: (() -> Void)) {
-        print("Normal")
         guard let position = scenePosition, let location = locationManager.currentLocation else { return }
 
         SCNTransaction.begin()
