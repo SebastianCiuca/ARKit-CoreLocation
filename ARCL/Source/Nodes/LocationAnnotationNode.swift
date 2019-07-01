@@ -16,7 +16,7 @@ open class LocationAnnotationNode: LocationNode {
     
     // TODO: - Change this to desired one
     /// The maximum estimated distance up until locations are shown.
-    public static var maxDistance: Float = 300
+    public static var maxDistance: Float = 50//300
     
     /// Constant used in scaling computations for scaling up.
     private static let scalingConstant: Float = 0.181
@@ -75,7 +75,7 @@ open class LocationAnnotationNode: LocationNode {
     override func updatePositionAndScale(setup: Bool = false, scenePosition: SCNVector3?,
                                          locationNodeLocation nodeLocation: CLLocation,
                                          locationManager: SceneLocationManager,
-                                         onCompletion: (() -> Void)) {        
+                                         onCompletion: (() -> Void)) {
         guard let position = scenePosition, let location = locationManager.currentLocation else { return }
 
         SCNTransaction.begin()
@@ -129,8 +129,10 @@ open class LocationAnnotationNode: LocationNode {
     private func computeScale(forDistance distance: CLLocationDistance, and adjustedDistance: CLLocationDistance) -> Float {
         var scaleForScale: Float = 0.7
         
-        if distance < 5 || Float(distance) > LocationAnnotationNode.maxDistance {
-            return 0
+        if distance < 5 {
+            scaleForScale = 0.15
+        } else if Float(distance) > LocationAnnotationNode.maxDistance {
+//            return 0
         }
         
         let thresholdDistance = Double(adjustedDistance)
