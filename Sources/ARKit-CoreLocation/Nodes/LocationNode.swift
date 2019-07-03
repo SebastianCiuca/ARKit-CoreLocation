@@ -68,6 +68,9 @@ open class LocationNode: SCNNode {
 
     /// The scheme to use for scaling
     public var scalingScheme: ScalingScheme = .normal
+    
+    /// Locations over this value are scaled down and their distance is modified to this value.
+    public static var thresholdDistance: Double = 100
 
     public init(location: CLLocation?) {
         self.location = location
@@ -91,23 +94,23 @@ open class LocationNode: SCNNode {
         }
     }
 
-    internal func adjustedDistance(setup: Bool, position: SCNVector3,
+    internal func adjustedDistance(setup: Bool, position: SCNVector3, locationNodeLocation: CLLocation,
                                    locationManager: SceneLocationManager) -> CLLocationDistance {
         guard let location = locationManager.currentLocation else { return 0.0 }
-
+        
         //Position is set to a position coordinated via the current position
         let distance = self.location(locationManager.bestLocationEstimate).distance(from: location)
-
+        
         let adjustedDistance: CLLocationDistance
-        if locationConfirmed && (distance > 100 || continuallyAdjustNodePositionWhenWithinRange || setup) {
-            let locationTranslation = location.translation(toLocation: self.location(locationManager.bestLocationEstimate))
-
-            if distance > 100 {
+        if locationConfirmed && (distance > LocationNode.thresholdDistance || continuallyAdjustNodePositionWhenWithinRange || setup) {
+            let locationTranslation = location.translation(toLocation: locationNodeLocation)
+            
+            if distance > LocationNode.thresholdDistance {
                 //If the item is too far away, bring it closer and scale it down
-                let scale = 100 / Float(distance)
-
+                let scale = Float(LocationNode.thresholdDistance / distance)
+                
                 adjustedDistance = distance * Double(scale)
-
+                
                 let adjustedTranslation = SCNVector3( x: Float(locationTranslation.longitudeTranslation) * scale,
                                                       y: Float(locationTranslation.altitudeTranslation) * scale,
                                                       z: Float(locationTranslation.latitudeTranslation) * scale)
@@ -125,24 +128,27 @@ open class LocationNode: SCNNode {
         } else {
             //Calculates distance based on the distance within the scene, as the location isn't yet confirmed
             adjustedDistance = Double(position.distance(to: position))
-
+            
             scale = SCNVector3(x: 1, y: 1, z: 1)
         }
-
+        
         return adjustedDistance
     }
 
     func updatePositionAndScale(setup: Bool = false, scenePosition: SCNVector3?,
-                                locationManager: SceneLocationManager, onCompletion: (() -> Void)) {
+                                locationNodeLocation nodeLocation: CLLocation,
+                                locationManager: SceneLocationManager,
+                                onCompletion: (() -> Void)) {
         guard let position = scenePosition, locationManager.currentLocation != nil else { return }
-
+        
         SCNTransaction.begin()
         SCNTransaction.animationDuration = setup ? 0.0 : 0.1
-
-        _ = self.adjustedDistance(setup: setup, position: position, locationManager: locationManager)
-
+        
+        _ = self.adjustedDistance(setup: setup, position: position,
+                                  locationNodeLocation: nodeLocation, locationManager: locationManager)
+        
         SCNTransaction.commit()
-
+        
         onCompletion()
     }
 }
