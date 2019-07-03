@@ -152,15 +152,13 @@ extension SettingsViewController: CLLocationManagerDelegate {
     }
 }
 
-
-
 // MARK: - Implementation
 
 @available(iOS 11.0, *)
 extension SettingsViewController {
 
-    func createARVC() -> ARCLViewController {
-        let arclVC = ARCLViewController.loadFromStoryboard()
+    func createARVC() -> POIViewController {
+        let arclVC = POIViewController.loadFromStoryboard()
         arclVC.showMap = showMapSwitch.isOn
 
         return arclVC
