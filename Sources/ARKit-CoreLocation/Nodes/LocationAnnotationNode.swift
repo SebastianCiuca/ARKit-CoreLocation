@@ -132,7 +132,7 @@ open class LocationAnnotationNode: LocationNode {
         if distance < 5 {
             scaleForScale = 0.15
         } else if Float(distance) > LocationAnnotationNode.maxDistance {
-            //            return 0
+            return 0
         }
         
         let thresholdDistance = Double(adjustedDistance)
