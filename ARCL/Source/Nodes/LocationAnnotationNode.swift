@@ -130,7 +130,7 @@ open class LocationAnnotationNode: LocationNode {
         var scaleForScale: Float = 0.7
         
         if distance < 5 {
-            scaleForScale = 0.15
+            scaleForScale = 0//0.15
         } else if Float(distance) > LocationAnnotationNode.maxDistance {
             return 0
         }
