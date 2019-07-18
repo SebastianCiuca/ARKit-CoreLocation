@@ -92,7 +92,6 @@ open class LocationAnnotationNode: LocationNode {
         
         //The scale of a node with a billboard constraint applied is ignored
         //The annotation subnode itself, as a subnode, has the scale applied to it
-        let appliedScale = self.scale
         self.scale = SCNVector3(x: 1, y: 1, z: 1)
         
         var scale: Float
@@ -115,10 +114,6 @@ open class LocationAnnotationNode: LocationNode {
             }
         }
         
-        self.pivot = SCNMatrix4MakeTranslation(0, -1.1 * scale, 0)
-        
-        SCNTransaction.animationDuration = setup ? 0.0 : 0.1
-        SCNTransaction.animationDuration = nodeScale == 0 ? 1.5 : SCNTransaction.animationDuration
         self.pivot = SCNMatrix4MakeTranslation(0, -1.1 * scale, 0)
         
         SCNTransaction.commit()
