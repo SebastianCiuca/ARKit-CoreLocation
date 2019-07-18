@@ -78,9 +78,6 @@ open class LocationAnnotationNode: LocationNode {
                                          onCompletion: (() -> Void)) {
         guard let position = scenePosition, let location = locationManager.currentLocation else { return }
         
-        SCNTransaction.begin()
-        SCNTransaction.animationDuration = setup ? 0.0 : 0.1
-        
         let distance = self.location(locationManager.bestLocationEstimate).distance(from: location)
         
         let newLocation = setup ? CLLocation(coordinate: nodeLocation.coordinate,
@@ -115,8 +112,6 @@ open class LocationAnnotationNode: LocationNode {
         }
         
         self.pivot = SCNMatrix4MakeTranslation(0, -1.1 * scale, 0)
-        
-        SCNTransaction.commit()
         
         onCompletion()
     }
